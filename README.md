@@ -2,13 +2,13 @@
 
 ## 使用
 
-1. 在release中下载最新的发行版（.exe文件）
+1. 在 [Release](https://github.com/ikenxuan/barcode-generator/releases) 中下载最新的发行版可执行文件（.exe文件）
 2. 放在和你 Excel 文件的 **同级目录下**
 3. 将 Excel 文件重命名为 `1.xlsx`
 4. 运行你下载到的 `.exe可执行文件`
 5. 运行成功后，会在当前目录生成 `output.xlsx`
 
-## 警告
+#### 警告
 可执行文件对传入的 Excel 文件有强制性要求！
 
 **传入的Excel 文件中，第一列是必须是需要生成条形码对应的文字**
