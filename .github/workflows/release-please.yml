@@ -13,7 +13,7 @@ jobs:
   # 任务名称：release-please
   release-please:
     # 运行环境：Ubuntu 最新版本
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     # 定义任务中的各个步骤
     steps:
@@ -56,7 +56,7 @@ jobs:
           yarn build
 
       # 步骤：上传
-      - name: Upload ZIP release asset
+      - name: Upload release asset
         if: steps.release-please.outputs.release_created == 'true'
         uses: actions/upload-release-asset@v1
         env:
