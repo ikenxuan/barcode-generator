@@ -52,8 +52,8 @@ jobs:
         if: steps.release-please.outputs.release_created == 'true'
         run: |
           npm install -g yarn
-          yarn run install
-          yarn run build
+          yarn install
+          yarn build
 
       # 步骤：上传
       - name: Upload ZIP release asset
