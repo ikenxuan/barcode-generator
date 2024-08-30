@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/ikenxuan/barcode-generator/compare/v1.0.2...v1.1.0) (2024-08-30)
+
+
+### Features
+
+* 支持自定义输入和输出列 ([a17c96a](https://github.com/ikenxuan/barcode-generator/commit/a17c96a7f4a01f5e7ab54c86e3c4d6cdcd4d84b6))
+
+
+### Bug Fixes
+
+* workflows ([8305bad](https://github.com/ikenxuan/barcode-generator/commit/8305bad9af7cfb4c0f25e537e0a56c8ef63119aa))
+
 ## [1.0.2](https://github.com/ikenxuan/barcode-generator/compare/v1.0.1...v1.0.2) (2024-08-21)
 
 
