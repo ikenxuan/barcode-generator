@@ -75,8 +75,18 @@ if (synced === cargo) {
 const { writeFileSync } = await import('node:fs')
 writeFileSync('src-tauri/Cargo.toml', synced)
 
+// 同步 AppStream 元数据的版本与发布日期（应用中心「最新更新时间」）
+const appdataPath = 'src-tauri/deb/appstream/bargen.appdata.xml'
+const appdata = readFileSync(appdataPath, 'utf-8')
+const today = new Date().toISOString().slice(0, 10)
+const updatedAppdata = appdata.replace(
+  /<release version="[^"]*" date="[^"]*"/,
+  `<release version="${version}" date="${today}"`,
+)
+writeFileSync(appdataPath, updatedAppdata)
+
 const tag = `v${version}`
-execFileSync('git', ['add', 'package.json', 'src-tauri/tauri.conf.json', 'src-tauri/Cargo.toml'])
+execFileSync('git', ['add', 'package.json', 'src-tauri/tauri.conf.json', 'src-tauri/Cargo.toml', 'src-tauri/deb/appstream/bargen.appdata.xml'])
 execFileSync('git', ['commit', '-m', `chore: release ${tag}`], { stdio: 'inherit' })
 execFileSync('git', ['tag', tag])
 

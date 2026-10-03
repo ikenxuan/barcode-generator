@@ -99,6 +99,10 @@ jobs:
       - name: Frontend tests
         run: pnpm test
 
+      - name: Generate AppStream metadata (gzip)
+        if: startsWith(matrix.platform, 'ubuntu')
+        run: gzip -9 -c src-tauri/deb/appstream/bargen.appdata.xml > src-tauri/deb/appstream/bargen.appdata.xml.gz
+
       - name: Build and release
         id: release
         uses: tauri-apps/tauri-action@v1

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components version="1.0">
+  <component type="desktop-application">
+    <id>bargen.desktop</id>
+    <pkgname>bargen</pkgname>
+    <name>条码生成器</name>
+    <summary>批量生成条形码并嵌入 Excel 表格</summary>
+    <developer_name>ikenxuan</developer_name>
+    <project_license>MIT</project_license>
+    <metadata_license>MIT</metadata_license>
+    <icon type="local" width="128" height="128">/usr/share/icons/hicolor/128x128/apps/bargen.png</icon>
+    <categories>
+      <category>Office</category>
+      <category>Utility</category>
+    </categories>
+    <description>
+      <p>读取表格文件的数据列，批量生成条形码图片并嵌入到指定输出列，另存为 xlsx。</p>
+      <p>支持 xlsx / xlsm / xls / xlsb / ods / csv 输入，CODE 128 / EAN-13 / EAN-8 / UPC-A / Code 39 / ITF / ITF-14 / QR 码制，全部条码由 Rust 引擎渲染，可视化表格面板支持 Excel/WPS 式编辑。</p>
+    </description>
+    <launchable type="desktop-id">bargen.desktop</launchable>
+    <releases>
+      <release version="2.0.0" date="2026-10-03" type="stable">
+        <url type="details">https://github.com/ikenxuan/barcode-generator/releases/tag/v2.0.0</url>
+      </release>
+    </releases>
+  </component>
+</components>

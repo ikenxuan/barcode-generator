@@ -49,11 +49,14 @@
         ]
       }
     },
-    "shortDescription": "批量生成条形码并嵌入 Excel 表格",
-    "longDescription": "读取表格文件的数据列，批量生成条形码图片并嵌入到指定输出列，另存为 xlsx。支持 xlsx/xlsm/xls/xlsb/ods/csv 输入，CODE 128/EAN-13/EAN-8/UPC-A/Code 39/ITF/ITF-14/QR 码制，全部条码由 Rust 引擎渲染。",
+    "shortDescription": "Batch barcode generator that embeds barcodes into spreadsheets",
+    "longDescription": "Reads a data column from spreadsheet files, batch-generates barcode images, embeds them into the chosen output column and saves as xlsx. Supports xlsx/xlsm/xls/xlsb/ods/csv input and CODE 128 / EAN-13 / EAN-8 / UPC-A / Code 39 / ITF / ITF-14 / QR symbologies. All barcodes are rendered by the Rust engine.",
     "linux": {
       "deb": {
-        "desktopTemplate": "./deb-desktop.hbs"
+        "desktopTemplate": "./deb-desktop.hbs",
+        "files": {
+          "./deb/appstream/bargen.appdata.xml.gz": "/usr/share/app-info/xmls/bargen.appdata.xml.gz"
+        }
       },
       "rpm": {
         "desktopTemplate": "./rpm-desktop.hbs"

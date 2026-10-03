@@ -120,6 +120,10 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate AppStream metadata (gzip)
+        if: startsWith(matrix.platform, 'ubuntu')
+        run: gzip -9 -c src-tauri/deb/appstream/bargen.appdata.xml > src-tauri/deb/appstream/bargen.appdata.xml.gz
+
       - name: Build bundles (uploaded as workflow artifacts)
         uses: tauri-apps/tauri-action@v1
         env:
