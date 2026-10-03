@@ -7,6 +7,10 @@ name: Release
 # Windows x64 额外产出「一键启动」免安装便携版 exe；
 # 完成后在 CI 摘要写入 Release 下载页链接。
 
+env:
+  # GitHub 托管 runner 无 /dev/fuse，AppImage 需解压模式运行（linuxdeploy 依赖它）
+  APPIMAGE_EXTRACT_AND_RUN: "1"
+
 on:
   push:
     tags:

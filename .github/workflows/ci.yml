@@ -3,6 +3,10 @@ name: CI
 # PR / push main 时：先跑双端测试；push main 额外构建全平台安装包，
 # 产物作为 workflow artifacts 保存，并在 CI 摘要里给出下载链接。
 
+env:
+  # GitHub 托管 runner 无 /dev/fuse，AppImage 需解压模式运行（linuxdeploy 依赖它）
+  APPIMAGE_EXTRACT_AND_RUN: "1"
+
 on:
   push:
     branches: [main]
