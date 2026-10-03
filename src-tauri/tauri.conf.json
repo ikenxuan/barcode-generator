@@ -55,7 +55,7 @@
       "deb": {
         "desktopTemplate": "./deb-desktop.hbs",
         "files": {
-          "./deb/appstream/bargen.appdata.xml.gz": "/usr/share/app-info/xmls/bargen.appdata.xml.gz"
+          "/usr/share/app-info/xmls/bargen.appdata.xml.gz": "./deb/appstream/bargen.appdata.xml.gz"
         }
       },
       "rpm": {
