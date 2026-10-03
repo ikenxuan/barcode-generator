@@ -47,11 +47,11 @@ jobs:
           # Linux x64
           - platform: ubuntu-22.04
             platform_name: linux-x64
-            args: ""
+            args: "--bundles deb"
           # Linux ARM64（GitHub 原生 arm runner）
           - platform: ubuntu-22.04-arm
             platform_name: linux-arm64
-            args: ""
+            args: "--bundles deb"
 
     runs-on: ${{ matrix.platform }}
     outputs:

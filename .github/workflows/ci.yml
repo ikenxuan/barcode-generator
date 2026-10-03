@@ -82,10 +82,10 @@ jobs:
             rust_targets: x86_64-apple-darwin
           - platform: ubuntu-22.04
             platform_name: linux-x64
-            args: ""
+            args: "--bundles deb"
           - platform: ubuntu-22.04-arm
             platform_name: linux-arm64
-            args: ""
+            args: "--bundles deb"
 
     runs-on: ${{ matrix.platform }}
     steps:
