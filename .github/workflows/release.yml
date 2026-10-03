@@ -71,6 +71,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
+          cache-on-failure: true
+          prefix-key: rust-release-${{ matrix.platform_name }}
 
       - name: Set up sccache (编译级二级缓存)
         uses: Mozilla-Actions/sccache-action@v0.0.11

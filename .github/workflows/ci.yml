@@ -28,6 +28,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
+          cache-on-failure: true
+          # 每条矩阵腿独立命名空间，避免同键互相覆盖
+          prefix-key: rust-build-${{ matrix.platform_name }}
 
       - name: Set up sccache (编译级二级缓存)
         uses: Mozilla-Actions/sccache-action@v0.0.11
