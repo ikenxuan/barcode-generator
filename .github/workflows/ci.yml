@@ -1,0 +1,151 @@
+name: CI
+
+# PR / push main 时：先跑双端测试；push main 额外构建全平台安装包，
+# 产物作为 workflow artifacts 保存，并在 CI 摘要里给出下载链接。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Rust unit tests
+        run: pnpm test:rust
+
+      - name: Frontend typecheck + build
+        run: pnpm build
+
+      - name: Frontend unit tests
+        run: pnpm test
+
+  build:
+    # push main 时构建全平台安装包（PR 只跑测试，避免重复开销）
+    if: github.event_name == 'push'
+    needs: test
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows-latest
+            platform_name: windows-x64
+            args: ""
+            portable: true
+          - platform: windows-latest
+            platform_name: windows-arm64
+            args: "--target aarch64-pc-windows-msvc --bundles nsis"
+            rust_targets: aarch64-pc-windows-msvc
+          - platform: macos-latest
+            platform_name: macos-arm64
+            args: "--target aarch64-apple-darwin"
+            rust_targets: aarch64-apple-darwin
+          - platform: macos-latest
+            platform_name: macos-x64
+            args: "--target x86_64-apple-darwin"
+            rust_targets: x86_64-apple-darwin
+          - platform: ubuntu-22.04
+            platform_name: linux-x64
+            args: ""
+          - platform: ubuntu-22.04-arm
+            platform_name: linux-arm64
+            args: ""
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_targets || '' }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install Linux dependencies
+        if: startsWith(matrix.platform, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build bundles (uploaded as workflow artifacts)
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          uploadWorkflowArtifacts: true
+          workflowArtifactNamePattern: "bargen-[platform]-[arch]-[bundle]"
+          args: ${{ matrix.args }}
+
+      - name: Prepare portable exe
+        if: matrix.portable == true
+        shell: pwsh
+        run: Copy-Item src-tauri/target/release/bargen.exe bargen-win-x64-portable.exe
+
+      - name: Upload portable exe
+        if: matrix.portable == true
+        uses: actions/upload-artifact@v7
+        with:
+          name: bargen-win-x64-portable
+          path: bargen-win-x64-portable.exe
+          if-no-files-found: error
+
+  summary:
+    # 汇总本次运行的产物下载链接，写入 CI 摘要页
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write artifact download links to summary
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          gh api "repos/$REPO/actions/runs/$RUN_ID/artifacts" --paginate             > /tmp/artifacts.json
+
+          {
+            echo "## 📦 bargen 构建产物"
+            echo ""
+            echo "| 产物 | 大小 | 下载 |"
+            echo "| --- | --- | --- |"
+            jq -r --arg repo "$REPO" --arg run "$RUN_ID"               '.artifacts[] | select(.expired == false)                | "| (.name) | ((.size_in_bytes / 1048576 * 10 | floor) / 10) MB | [下载](https://github.com/($repo)/actions/runs/($run)/artifacts/(.id)) |"'               /tmp/artifacts.json
+            echo ""
+            echo "> 完整运行页：<https://github.com/$REPO/actions/runs/$RUN_ID>"
+          } >> "$GITHUB_STEP_SUMMARY"

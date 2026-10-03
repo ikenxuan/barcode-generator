@@ -1,0 +1,158 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---- Apple 化的 HeroUI 主题覆盖（oklch） ---- */
+:root,
+[data-theme="light"] {
+  /* #0071e3 Apple 蓝 */
+  --accent: oklch(0.546 0.193 255);
+  --accent-foreground: oklch(0.9911 0 0);
+  /* #f5f5f7 */
+  --background: oklch(0.9702 0.0022 286);
+  --surface: oklch(1 0 0);
+  --surface-secondary: oklch(0.98 0.002 286);
+  --radius: 0.5rem;
+  --backdrop: rgba(0, 0, 0, 0.32);
+}
+
+[data-theme="dark"] {
+  /* #0a84ff */
+  --accent: oklch(0.65 0.184 250.4);
+  /* #1c1c1e */
+  --background: oklch(0.2425 0.004 285.8);
+  --surface: oklch(0.265 0.005 285.8);
+  --surface-secondary: oklch(0.3 0.005 285.8);
+  --backdrop: rgba(0, 0, 0, 0.5);
+}
+
+/* ---- 应用自定义变量 ---- */
+:root {
+  --app-accent-strong: #0060c9;
+
+  /* 材质 */
+  --material-thin: rgba(255, 255, 255, 0.55);
+  --material-thick: rgba(246, 246, 248, 0.86);
+  --edge-light: rgba(255, 255, 255, 0.55);
+
+  /* 表面与文字 */
+  --app-bg: #f5f5f7;
+  --app-border: rgba(0, 0, 0, 0.08);
+  --app-text: #1d1d1f;
+  --app-text-2: #6e6e73;
+  --app-text-3: #aeaeb2;
+
+  color-scheme: light;
+}
+
+.dark {
+  --app-accent-strong: #409cff;
+
+  --material-thin: rgba(30, 30, 32, 0.55);
+  --material-thick: rgba(24, 24, 26, 0.88);
+  --edge-light: rgba(255, 255, 255, 0.08);
+
+  --app-bg: #1c1c1e;
+  --app-border: rgba(255, 255, 255, 0.1);
+  --app-text: #f5f5f7;
+  --app-text-2: #a1a1a6;
+  --app-text-3: #6e6e73;
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--app-accent-strong);
+  --color-bg: var(--app-bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-secondary);
+  --color-line: var(--app-border);
+  --color-text: var(--app-text);
+  --color-text-2: var(--app-text-2);
+  --color-text-3: var(--app-text-3);
+  --ease-ui: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font: 100%/1.5 system-ui, -apple-system, "Segoe UI Variable Text", "Segoe UI",
+    "Microsoft YaHei UI", sans-serif;
+  background: var(--app-bg);
+  color: var(--app-text);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  overflow: hidden;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* Apple 材质层：半透明 + 背景模糊 */
+.material-thin {
+  background: var(--material-thin);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+.material-thick {
+  background: var(--material-thick);
+  backdrop-filter: blur(28px) saturate(170%);
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+}
+
+/* 按压即时反馈（pointer-down，而非松开时） */
+.pressable:active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .material-thin,
+  .material-thick {
+    background: var(--surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* 细滚动条 */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--app-text-3) 55%, transparent);
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--app-text-3);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* AG Grid 变量桥接 */
+.barcode-grid {
+  --ag-font-family: inherit;
+  --ag-font-size: 12.5px;
+  height: 100%;
+  width: 100%;
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "bargen",
+  "version": "2.0.0",
+  "identifier": "com.ikenxuan.bargen",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "条码生成器",
+        "width": 1320,
+        "height": 860,
+        "minWidth": 980,
+        "minHeight": 640,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "nsis": {
+        "installerIcon": "icons/icon.ico",
+        "uninstallerIcon": "icons/icon.ico",
+        "languages": [
+          "SimpChinese",
+          "English"
+        ]
+      },
+      "wix": {
+        "language": [
+          "zh-CN"
+        ]
+      }
+    },
+    "shortDescription": "批量生成条形码并嵌入 Excel 表格",
+    "longDescription": "读取表格文件的数据列，批量生成条形码图片并嵌入到指定输出列，另存为 xlsx。支持 xlsx/xlsm/xls/xlsb/ods/csv 输入，CODE 128/EAN-13/EAN-8/UPC-A/Code 39/ITF/ITF-14/QR 码制，全部条码由 Rust 引擎渲染。",
+    "linux": {
+      "deb": {
+        "desktopTemplate": "./deb-desktop.hbs"
+      },
+      "rpm": {
+        "desktopTemplate": "./rpm-desktop.hbs"
+      }
+    }
+  }
+}

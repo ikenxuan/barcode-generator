@@ -1,0 +1,47 @@
+[package]
+name = "bargen"
+version = "2.0.0"
+description = "Excel 条形码生成器 - 读取 Excel 数据列生成条形码并嵌入表格"
+authors = ["ikenxuan"]
+edition = "2021"
+
+[lib]
+name = "bargen_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Excel 读写（读改写现有 xlsx 且保留原格式、支持插图）
+umya-spreadsheet = "3"
+# 条码符号编码（各码制的编码规范实现）
+barcoders = "2"
+# 位图渲染与 PNG 输出
+image = { version = "0.25", default-features = false, features = ["png"] }
+imageproc = "0.27"
+ab_glyph = "0.2"
+# 二维码
+qrcode = { version = "0.14", default-features = false, features = ["image"] }
+# 并行渲染
+rayon = "1"
+base64 = "0.22"
+calamine = "0.36"
+csv = "1"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true
+
+[dev-dependencies]
+rust_xlsxwriter = "0.99"

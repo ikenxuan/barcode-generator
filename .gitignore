@@ -1,4 +1,19 @@
-node_modules/*
-dist/*
+node_modules
+dist
+dist-ssr
+src-tauri/target
+*.local
 1.xlsx
 output.xlsx
+*.log
+.DS_Store
+
+# Tauri 生成物
+src-tauri/gen/schemas
+
+# 本地构建的便携版 exe
+/bargen-win-x64.exe
+
+# 测试文件与产物一律不入 git
+*.xlsx
+src-tauri/tests/fixtures/

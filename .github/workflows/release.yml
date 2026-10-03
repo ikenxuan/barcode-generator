@@ -1,0 +1,136 @@
+name: Release
+
+# 推送 v* tag 后构建全平台安装包并发布 GitHub Release。
+# 版本 tag 由 pnpm release 本地创建，推送由人工完成。
+#
+# 矩阵：Windows / macOS / Linux 各覆盖 x64 + ARM64；
+# Windows x64 额外产出「一键启动」免安装便携版 exe；
+# 完成后在 CI 摘要写入 Release 下载页链接。
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Windows x64 —— 额外产出便携版 exe
+          - platform: windows-latest
+            platform_name: windows-x64
+            args: ""
+            portable: true
+          # Windows ARM64（NSIS 支持 arm64；WiX/MSI 不打，避免失败）
+          - platform: windows-latest
+            platform_name: windows-arm64
+            args: "--target aarch64-pc-windows-msvc --bundles nsis"
+            rust_targets: aarch64-pc-windows-msvc
+          # macOS Apple Silicon
+          - platform: macos-latest
+            platform_name: macos-arm64
+            args: "--target aarch64-apple-darwin"
+            rust_targets: aarch64-apple-darwin
+          # macOS Intel（在 Apple Silicon runner 上交叉编译）
+          - platform: macos-latest
+            platform_name: macos-x64
+            args: "--target x86_64-apple-darwin"
+            rust_targets: x86_64-apple-darwin
+          # Linux x64
+          - platform: ubuntu-22.04
+            platform_name: linux-x64
+            args: ""
+          # Linux ARM64（GitHub 原生 arm runner）
+          - platform: ubuntu-22.04-arm
+            platform_name: linux-arm64
+            args: ""
+
+    runs-on: ${{ matrix.platform }}
+    outputs:
+      release_url: ${{ steps.release.outputs.releaseHtmlUrl }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_targets || '' }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install Linux dependencies
+        if: startsWith(matrix.platform, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Rust unit tests
+        run: pnpm test:rust
+
+      - name: Frontend tests
+        run: pnpm test
+
+      - name: Build and release
+        id: release
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "条码生成器 ${{ github.ref_name }}"
+          releaseBody: "在下方 Assets 下载对应平台的安装包；Windows 另提供免安装便携版（bargen-v*-win-x64-portable.exe，需系统自带 WebView2，Win10/11 默认内置）。"
+          releaseDraft: false
+          prerelease: false
+          args: ${{ matrix.args }}
+
+      # —— Windows x64 便携版：免安装单文件 ——
+      - name: Prepare portable exe
+        if: matrix.portable == true
+        shell: pwsh
+        run: Copy-Item src-tauri/target/release/bargen.exe "bargen-${{ github.ref_name }}-win-x64-portable.exe"
+
+      - name: Upload portable exe
+        if: matrix.portable == true
+        uses: softprops/action-gh-release@v3
+        with:
+          files: "bargen-${{ github.ref_name }}-win-x64-portable.exe"
+
+  summary:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write release download links to summary
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+          RELEASE_URL: ${{ needs.build.outputs.release_url }}
+        run: |
+          gh api "repos/$REPO/releases/tags/$TAG" > /tmp/release.json
+
+          {
+            echo "## 🚀 条码生成器 $TAG 已发布"
+            echo ""
+            echo "**下载页：** $RELEASE_URL"
+            echo ""
+            echo "| 安装包 | 大小 | 下载 |"
+            echo "| --- | --- | --- |"
+            jq -r '.assets[] | "| (.name) | ((.size / 1048576 * 10 | floor) / 10) MB | [下载]((.browser_download_url)) |"'               /tmp/release.json
+          } >> "$GITHUB_STEP_SUMMARY"
