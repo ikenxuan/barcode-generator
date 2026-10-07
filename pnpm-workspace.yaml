@@ -2,3 +2,5 @@ allowBuilds:
   esbuild: true
   "@tailwindcss/oxide": true
   canvas: true
+minimumReleaseAgeExclude:
+  - lucide-react@1.51.0

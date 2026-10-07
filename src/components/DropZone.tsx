@@ -1,32 +1,45 @@
 import { motion } from "motion/react";
 import { Barcode, FolderOpen } from "lucide-react";
+import { Chip } from "@heroui/react";
 
-/** 空状态：拖入或点击选择 xlsx */
+const FORMATS = ["xlsx", "xlsm", "xls", "xlsb", "ods", "csv"];
+
+/** 空状态：拖入或点击选择表格文件 */
 export function DropZone({ onOpenFile }: { onOpenFile: () => void }) {
   return (
     <div className="flex h-full items-center justify-center p-8">
       <motion.div
-        initial={{ opacity: 0, transform: "scale(0.97)" }}
-        animate={{ opacity: 1, transform: "scale(1)" }}
-        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+        initial={{ opacity: 0, transform: "scale(0.97) translateY(8px)" }}
+        animate={{ opacity: 1, transform: "scale(1) translateY(0)" }}
+        transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
         className="w-full max-w-md"
       >
         <button
           onClick={onOpenFile}
-          className="group flex w-full flex-col items-center gap-4 rounded-2xl border-2 border-dashed border-line bg-surface/60 px-8 py-14 transition-colors duration-200 hover:border-accent/50 hover:bg-accent/5"
+          className="group flex w-full flex-col items-center gap-5 rounded-2xl border-2 border-dashed border-line bg-surface/60 px-8 py-14 transition-colors duration-200 hover:border-accent/50 hover:bg-accent/5"
         >
-          <div className="relative">
-            <Barcode size={52} strokeWidth={1.5} className="text-accent" />
-          </div>
+          <motion.span
+            initial={{ opacity: 0, transform: "scale(0.9)" }}
+            animate={{ opacity: 1, transform: "scale(1)" }}
+            transition={{ duration: 0.4, delay: 0.08, ease: [0.23, 1, 0.32, 1] }}
+            className="flex size-16 items-center justify-center rounded-2xl bg-accent/10"
+          >
+            <Barcode size={34} strokeWidth={1.8} className="text-accent" />
+          </motion.span>
           <div className="text-center">
-            <p className="text-[15px] font-semibold">拖入 Excel 文件开始</p>
+            <p className="text-[15px] font-semibold tracking-[-0.01em]">拖入表格文件开始</p>
             <p className="mt-1.5 text-[12.5px] leading-5 text-text-2">
-              支持 xlsx / xlsm / xls / xlsb / ods / csv
-              <br />
               数据列内容将生成条形码并嵌入表格
             </p>
           </div>
-          <span className="pressable mt-1 flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-[13px] font-medium text-white group-hover:bg-accent-strong">
+          <div className="flex flex-wrap items-center justify-center gap-1.5">
+            {FORMATS.map((f) => (
+              <Chip key={f} size="sm" variant="tertiary" className="font-mono text-[11px]">
+                {f}
+              </Chip>
+            ))}
+          </div>
+          <span className="pressable mt-1 flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-[13px] font-medium text-white transition-colors duration-150 group-hover:bg-accent-strong">
             <FolderOpen size={15} />
             选择文件
           </span>

@@ -156,3 +156,8 @@ body {
   height: 100%;
   width: 100%;
 }
+
+/* 数据/输出列高亮切换时的平滑过渡（paint-only；同一列内回收的单元格背景一致，不会闪烁） */
+.ag-cell {
+  transition: background-color 0.25s var(--ease-ui);
+}

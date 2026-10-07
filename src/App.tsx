@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
-import { toast } from "@heroui/react";
-import { Toolbar } from "@/components/Toolbar";
+import { AnimatePresence, motion } from "motion/react";
+import { Spinner, toast } from "@heroui/react";
+import { AppHeader, type BusyMode } from "@/components/AppHeader";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { BarcodeGrid } from "@/components/BarcodeGrid";
+import { StatusBar } from "@/components/StatusBar";
 import { PreviewDialog } from "@/components/PreviewDialog";
 import { ProgressCard } from "@/components/ProgressCard";
 import { ResultDialog } from "@/components/ResultDialog";
@@ -18,6 +20,7 @@ export default function App() {
   const sheetIndex = useApp((s) => s.sheetIndex);
   const setWorkbook = useApp((s) => s.setWorkbook);
   const setSheetData = useApp((s) => s.setSheetData);
+  const loadingSheet = useApp((s) => s.loadingSheet);
   const setLoadingSheet = useApp((s) => s.setLoadingSheet);
   const format = useApp((s) => s.format);
   const style = useApp((s) => s.style);
@@ -32,7 +35,7 @@ export default function App() {
   const [previewValue, setPreviewValue] = useState<string | null>(null);
   const [progress, setProgress] = useState<ProgressEvent | null>(null);
   const [result, setResult] = useState<{ result: GenerateResult; mode: "excel" | "png" } | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [busyMode, setBusyMode] = useState<BusyMode>(null);
   const [dragOver, setDragOver] = useState(false);
   const generating = useRef(false);
 
@@ -108,7 +111,7 @@ export default function App() {
       let outputPath: string | undefined;
       let pngOutputDir: string | undefined;
       if (mode === "excel") {
-        const dir = workbook.path.replace(/[\/][^\/]+$/, "");
+        const dir = workbook.path.replace(/[\\/][^\\/]+$/, "");
         outputPath = await api.pickSavePath([dir, outputName || "output.xlsx"].join("/"));
         if (!outputPath) return;
       } else {
@@ -131,7 +134,7 @@ export default function App() {
       };
 
       generating.current = true;
-      setBusy(true);
+      setBusyMode(mode);
       setProgress({ stage: "open", current: 0, total: 1, message: "正在打开文件…" });
       try {
         const r = await api.generate(req, mode, (e) => setProgress(e));
@@ -155,35 +158,66 @@ export default function App() {
         toast.danger("生成失败", { description: String(e) });
       } finally {
         generating.current = false;
-        setBusy(false);
+        setBusyMode(null);
       }
     },
     [workbook, dataColumn, outputColumn, sheetIndex, startRow, endRow, format, style, outputName, openAfterDone],
   );
 
+  const hasGrid = !!workbook && workbook.sheets.length > 0;
+
   return (
     <div className="flex h-full flex-col">
-      <Toolbar
+      <AppHeader
         onOpenFile={() => openFile()}
         onGenerate={() => runGenerate("excel")}
         onExportPng={() => runGenerate("png")}
-        busy={busy}
+        busyMode={busyMode}
       />
 
       <div className="flex min-h-0 flex-1">
-        <main className="relative min-w-0 flex-1 bg-surface">
-          {workbook && workbook.sheets.length > 0 ? (
-            <>
-              <BarcodeGrid onPreview={setPreviewValue} />
-              {dragOver && (
-                <div className="pointer-events-none absolute inset-3 z-10 flex items-center justify-center rounded-xl border-2 border-dashed border-accent bg-accent/10 backdrop-blur-sm">
-                  <p className="text-[14px] font-medium text-accent">松开以打开文件</p>
-                </div>
-              )}
-            </>
-          ) : (
-            <DropZone onOpenFile={() => openFile()} />
-          )}
+        <main className="relative flex min-w-0 flex-1 flex-col bg-surface">
+          <div className="relative min-h-0 flex-1">
+            {hasGrid ? (
+              <>
+                <BarcodeGrid onPreview={setPreviewValue} />
+
+                {/* 工作表加载中：网格区即时反馈 */}
+                <AnimatePresence>
+                  {loadingSheet && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute inset-0 z-10 flex items-center justify-center bg-surface/60 backdrop-blur-[2px]"
+                    >
+                      <Spinner size="lg" color="accent" aria-label="读取工作表中" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* 拖拽悬停提示 */}
+                <AnimatePresence>
+                  {dragOver && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="pointer-events-none absolute inset-3 z-20 flex items-center justify-center rounded-xl border-2 border-dashed border-accent bg-accent/10 backdrop-blur-sm"
+                    >
+                      <p className="text-[14px] font-medium text-accent">松开以打开文件</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </>
+            ) : (
+              <DropZone onOpenFile={() => openFile()} />
+            )}
+          </div>
+
+          {hasGrid && <StatusBar />}
         </main>
 
         <SettingsPanel />

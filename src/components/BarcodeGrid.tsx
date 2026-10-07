@@ -32,43 +32,40 @@ function ColumnHeader(props: { colId?: string; displayName?: string; column?: { 
   const isOutput = outputColumn === index;
 
   const chip =
-    "pointer-events-auto select-none rounded-full px-2 py-px text-[11px] font-medium leading-4 transition-colors duration-150";
+    "pointer-events-auto shrink-0 select-none rounded-full px-1.5 py-px text-[10.5px] font-medium leading-4 transition-colors duration-150";
   return (
-    <div className="flex h-full w-full items-center gap-1.5 overflow-hidden px-2">
-      <span className="truncate text-[12.5px] font-medium">
-        {isData ? "数据 · " : isOutput ? "输出 · " : ""}
+    <div className="flex h-full w-full items-center gap-1 overflow-hidden px-1">
+      <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium">
         {props.displayName}
       </span>
-      <span className="ml-auto flex gap-1">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setDataColumn(isData ? null : index);
-          }}
-          className={`${chip} ${
-            isData
-              ? "bg-accent text-white"
-              : "bg-black/5 text-text-2 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15"
-          }`}
-          title="设为数据列（条码内容来源）"
-        >
-          数据
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setOutputColumn(isOutput ? null : index);
-          }}
-          className={`${chip} ${
-            isOutput
-              ? "bg-emerald-600 text-white"
-              : "bg-black/5 text-text-2 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15"
-          }`}
-          title="设为输出列（条码图片嵌入位置）"
-        >
-          输出
-        </button>
-      </span>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setDataColumn(isData ? null : index);
+        }}
+        className={`${chip} ${
+          isData
+            ? "bg-accent text-white"
+            : "bg-black/5 text-text-2 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15"
+        }`}
+        title="设为数据列（条码内容来源）"
+      >
+        数据
+      </button>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setOutputColumn(isOutput ? null : index);
+        }}
+        className={`${chip} ${
+          isOutput
+            ? "bg-emerald-600 text-white"
+            : "bg-black/5 text-text-2 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15"
+        }`}
+        title="设为输出列（条码图片嵌入位置）"
+      >
+        输出
+      </button>
     </div>
   );
 }
@@ -204,7 +201,7 @@ function useGridModel() {
           "bg-accent/8 dark:bg-accent/15": () => dataColumn === i + 1,
           "bg-emerald-500/8 dark:bg-emerald-500/15": () => outputColumn === i + 1,
         },
-        minWidth: 110,
+        minWidth: 128,
         flex: 1,
         sortable: false,
         suppressMovable: true,
@@ -392,7 +389,6 @@ function ContextMenu({
 
 export function BarcodeGrid({ onPreview }: { onPreview: (value: string) => void }) {
   const theme = useApp((s) => s.theme);
-  const sheetData = useApp((s) => s.sheetData);
   const applyCellEdit = useApp((s) => s.applyCellEdit);
   const { rowData, columnDefs } = useGridModel();
 
@@ -439,7 +435,6 @@ export function BarcodeGrid({ onPreview }: { onPreview: (value: string) => void 
         rowBuffer={8}
       />
       {menu && <ContextMenu menu={menu} onClose={() => setMenu(null)} />}
-      {sheetData === null && <span />}
     </div>
   );
 }

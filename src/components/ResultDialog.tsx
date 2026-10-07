@@ -14,17 +14,20 @@ export function ResultDialog({
 }) {
   const isPng = mode === "png";
   return (
-    <Modal.Backdrop isOpen={!!result} onOpenChange={(o) => !o && onClose()}>
+    <Modal.Backdrop variant="blur" isOpen={!!result} onOpenChange={(o) => !o && onClose()}>
       <Modal.Container>
         <Modal.Dialog className="w-[440px] max-w-[92vw]">
-          <div className="flex items-center gap-2.5">
-            <CheckCircle2 size={22} className="text-success" />
+          <Modal.CloseTrigger aria-label="关闭" />
+          <Modal.Header>
+            <Modal.Icon>
+              <CheckCircle2 size={22} className="text-success" />
+            </Modal.Icon>
             <Modal.Heading className="text-[15px] font-semibold">
               {isPng ? "PNG 导出完成" : "条形码生成完成"}
             </Modal.Heading>
-          </div>
+          </Modal.Header>
 
-          <Modal.Body className="mt-3">
+          <Modal.Body>
             <p className="text-[13px] text-muted">
               共 {result?.totalRows ?? 0} 行，成功 {result?.success ?? 0} 行
               {result && result.failed.length > 0 && (
@@ -46,7 +49,7 @@ export function ResultDialog({
             )}
           </Modal.Body>
 
-          <Modal.Footer className="mt-5">
+          <Modal.Footer>
             <Button
               variant="outline"
               className="gap-1.5"
